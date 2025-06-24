@@ -5,7 +5,7 @@ CLI version of [ApkDataMultiplexing](https://github.com/L-JINBIN/ApkDataMultiple
 ## Usage
 
 ```shell
-java -jar ApkDataMultiplex.jar --help
+╰─> java -jar ApkDataMultiplex.jar --help
 Usage: ApkDataMultiplex [-hV] <inputApk> <outputApk> <baseApk>
 Performs APK data multiplexing and signs the output.
       <inputApk>    Path to the input APK file
@@ -18,7 +18,7 @@ Performs APK data multiplexing and signs the output.
 ## Example
 
 ```shell
-java -jar ApkDataMultiplex.jar test.apk out.apk assets/base.apk
+╰─> java -jar ApkDataMultiplex.jar test.apk out.apk assets/base.apk
 Running optimization...
 assets/base.apk >> offset=0x0
   +0x21ae  res/a
