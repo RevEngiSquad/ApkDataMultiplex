@@ -2,6 +2,7 @@ package org.revengi;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import java.io.File;
 import java.io.InputStream;
@@ -27,6 +28,9 @@ public class ApkDataMultiplex implements Runnable {
     @Parameters(index = "2", paramLabel = "<baseApk>", description = "Path to the duplicate base APK inside input APK path")
     private File baseApk;
 
+    @Option(names = { "-ns", "--no-sign" }, description = "Do not sign the output APK", defaultValue = "false")
+    private boolean noSign;
+
     @Override
     public void run() {
         try {
@@ -37,24 +41,28 @@ public class ApkDataMultiplex implements Runnable {
                     baseApk.getPath(),
                     true);
 
-            System.out.println("Optimization complete. Now signing...");
-            InputStream jksStream = ApkDataMultiplex.class
-                    .getClassLoader()
-                    .getResourceAsStream("test.jks");
-            if (jksStream == null) {
-                System.err.println("Keystore not found in resources!");
-                return;
+            System.out.println("Optimization complete.");
+
+            if (!noSign) {
+                System.out.println("Now signing...");
+                InputStream jksStream = ApkDataMultiplex.class
+                        .getClassLoader()
+                        .getResourceAsStream("test.jks");
+                if (jksStream == null) {
+                    System.err.println("Keystore not found in resources!");
+                    return;
+                }
+                File tempJks = File.createTempFile("test", ".jks");
+                tempJks.deleteOnExit();
+                Files.copy(jksStream, tempJks.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                V2V3SchemeSigner.sign(
+                        outputApk,
+                        new JksSignatureKey(tempJks.getAbsolutePath(), "123456",
+                                "123456", "123456"),
+                        true,
+                        true);
+                System.out.println("Signing complete!");
             }
-            File tempJks = File.createTempFile("test", ".jks");
-            tempJks.deleteOnExit();
-            Files.copy(jksStream, tempJks.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            V2V3SchemeSigner.sign(
-                    outputApk,
-                    new JksSignatureKey(tempJks.getAbsolutePath(), "123456",
-                            "123456", "123456"),
-                    true,
-                    true);
-            System.out.println("Signing complete!");
         } catch (Exception e) {
             System.err.println("Operation failed: " + e.getMessage());
             e.printStackTrace();
